@@ -1,3 +1,4 @@
+# файл main.py
 import os
 import asyncio
 import logging
@@ -21,9 +22,9 @@ async def start(message):
 @bot.message_handler(func=lambda message: True)
 async def handle_message(message):
     user_message = message.text
-    async with AsyncClient(provider=You) as client:
-        response = await client.create(model='claude-3-sonnet', messages=[{"role": "user", "content": user_message}])
-        await bot.send_message(message.chat.id, response['choices'][0]['message']['content'])
+    client = AsyncClient(provider=You)
+    response = await client.create(model='claude-3-sonnet', messages=[{"role": "user", "content": user_message}])
+    await bot.send_message(message.chat.id, response['choices'][0]['message']['content'])
 
 # Запуск бота
 async def main():
