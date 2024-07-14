@@ -4,5 +4,6 @@ g4f
 motor
 curl_cffi
 nest_asyncio
-nodriver
+undetected-chromedriver
+
 
