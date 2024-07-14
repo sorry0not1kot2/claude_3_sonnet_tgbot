@@ -18,21 +18,27 @@ logging.basicConfig(level=logging.INFO)
 BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 bot = AsyncTeleBot(BOT_TOKEN)
 
-# Настройка undetected_chromedriver
-chrome_options = uc.ChromeOptions()
-chrome_options.add_argument("--no-sandbox")
-
 # Обработчик команды /start
 async def start(message):
     await bot.send_message(message.chat.id, 'Привет! Я бот для общения с LLM Claude Sonet.')
 
 # Асинхронная функция для обработки сообщений
 async def handle_message(message):
-    user_message = message.text
-    driver = uc.Chrome(options=chrome_options)
-    response = await g4f.ChatCompletion.create(provider=You, model='claude-3-sonnet', messages=[{"role": "user", "content": user_message}], driver=driver)
-    await bot.send_message(message.chat.id, response['choices'][0]['message']['content'])
-    driver.quit()
+    try:
+        user_message = message.text
+        chrome_options = uc.ChromeOptions()
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--disable-gpu")
+        
+        driver = uc.Chrome(options=chrome_options)
+        response = await g4f.ChatCompletion.create(provider=You, model='claude-3-sonnet', messages=[{"role": "user", "content": user_message}], driver=driver)
+        await bot.send_message(message.chat.id, response['choices'][0]['message']['content'])
+        driver.quit()
+    except Exception as e:
+        logging.error(f"Ошибка при обработке сообщения: {e}")
+        await bot.send_message(message.chat.id, "Произошла ошибка при обработке вашего сообщения.")
 
 # Добавление обработчиков
 bot.register_message_handler(start, commands=['start'])
