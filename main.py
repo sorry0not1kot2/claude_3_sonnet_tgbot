@@ -6,7 +6,7 @@ import nest_asyncio
 from telebot.async_telebot import AsyncTeleBot
 import g4f
 from g4f.Provider import You
-from nodriver import ChromeDriver
+import undetected_chromedriver as uc
 
 # Применение nest_asyncio
 nest_asyncio.apply()
@@ -18,8 +18,8 @@ logging.basicConfig(level=logging.INFO)
 BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 bot = AsyncTeleBot(BOT_TOKEN)
 
-# Настройка ChromeDriver с параметром no_sandbox
-chrome_options = ChromeDriver.Options()
+# Настройка undetected_chromedriver
+chrome_options = uc.ChromeOptions()
 chrome_options.add_argument("--no-sandbox")
 
 # Обработчик команды /start
@@ -29,8 +29,10 @@ async def start(message):
 # Асинхронная функция для обработки сообщений
 async def handle_message(message):
     user_message = message.text
-    response = await g4f.ChatCompletion.create(provider=You, model='claude-3-sonnet', messages=[{"role": "user", "content": user_message}], options=chrome_options)
+    driver = uc.Chrome(options=chrome_options)
+    response = await g4f.ChatCompletion.create(provider=You, model='claude-3-sonnet', messages=[{"role": "user", "content": user_message}], driver=driver)
     await bot.send_message(message.chat.id, response['choices'][0]['message']['content'])
+    driver.quit()
 
 # Добавление обработчиков
 bot.register_message_handler(start, commands=['start'])
