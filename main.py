@@ -7,6 +7,7 @@ from telebot.async_telebot import AsyncTeleBot
 import g4f
 from g4f.Provider import You
 import undetected_chromedriver as uc
+import nodriver  # Импортируем nodriver
 
 # Применение nest_asyncio
 nest_asyncio.apply()
