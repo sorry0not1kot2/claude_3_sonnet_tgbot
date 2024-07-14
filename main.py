@@ -23,7 +23,7 @@ async def start(message):
 async def handle_message(message):
     user_message = message.text
     client = AsyncClient(provider=You)
-    response = await client.generate(model='claude-3-sonnet', messages=[{"role": "user", "content": user_message}])
+    response = await client.completion(model='claude-3-sonnet', messages=[{"role": "user", "content": user_message}])
     await bot.send_message(message.chat.id, response['choices'][0]['message']['content'])
 
 # Запуск бота
