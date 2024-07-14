@@ -1,5 +1,5 @@
 # requirements.txt
-python-telegram-bot
+pyTelegramBotAPI
 g4f
 motor
 curl_cffi
