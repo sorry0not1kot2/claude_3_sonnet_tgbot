@@ -5,5 +5,4 @@ motor
 curl_cffi
 nest_asyncio
 undetected-chromedriver
-
-
+nodriver
