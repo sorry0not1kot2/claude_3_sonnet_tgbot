@@ -2,9 +2,13 @@
 import os
 import asyncio
 import logging
+import nest_asyncio
 from telebot.async_telebot import AsyncTeleBot
 import g4f
 from g4f.Provider import You
+
+# Применение nest_asyncio
+nest_asyncio.apply()
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
