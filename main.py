@@ -4,7 +4,6 @@ import asyncio
 import logging
 from telebot.async_telebot import AsyncTeleBot
 import g4f
-from g4f.client import AsyncClient
 from g4f.Provider import You
 
 # Настройка логирования
@@ -21,8 +20,7 @@ async def start(message):
 # Асинхронная функция для обработки сообщений
 async def handle_message(message):
     user_message = message.text
-    client = AsyncClient(provider=You)
-    response = await client.chat(model='claude-3-sonnet', messages=[{"role": "user", "content": user_message}])
+    response = await g4f.ChatCompletion.create(provider=You, model='claude-3-sonnet', messages=[{"role": "user", "content": user_message}])
     await bot.send_message(message.chat.id, response['choices'][0]['message']['content'])
 
 # Добавление обработчиков
@@ -37,3 +35,4 @@ async def main():
 # Запуск бота
 if __name__ == '__main__':
     asyncio.run(main())
+
