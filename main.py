@@ -5,8 +5,8 @@ import nest_asyncio
 from telebot.async_telebot import AsyncTeleBot
 import g4f
 from g4f.Provider import You
-import undetected_chromedriver as uc
 import base64
+import requests
 
 # Применение nest_asyncio
 nest_asyncio.apply()
@@ -33,18 +33,15 @@ async def start(message):
 async def handle_message(message):
     try:
         user_message = message.text
-        chrome_options = uc.ChromeOptions()
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--disable-dev-shm-usage")
-        chrome_options.add_argument("--disable-gpu")
-        chrome_options.add_argument("--disable-software-rasterizer")
-        
-        driver = uc.Chrome(options=chrome_options, no_sandbox=True)
         auth_header = get_auth()
-        response = await g4f.ChatCompletion.create(provider=You, model='claude-3-sonnet', messages=[{"role": "user", "content": user_message}], driver=driver, headers={"Authorization": auth_header})
-        await bot.send_message(message.chat.id, response['choices'][0]['message']['content'])
-        driver.quit()
+        headers = {"Authorization": auth_header}
+        data = {
+            "model": "claude-3-sonnet",
+            "messages": [{"role": "user", "content": user_message}]
+        }
+        response = requests.post("https://api.you.com/v1/chat/completions", headers=headers, json=data)
+        response_data = response.json()
+        await bot.send_message(message.chat.id, response_data['choices'][0]['message']['content'])
     except Exception as e:
         logging.error(f"Ошибка при обработке сообщения: {e}")
         await bot.send_message(message.chat.id, "Произошла ошибка при обработке вашего сообщения.")
