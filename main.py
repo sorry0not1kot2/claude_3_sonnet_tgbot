@@ -40,26 +40,3 @@ async def handle_message(message):
             "messages": [{"role": "user", "content": user_message}]
         }
         response = requests.post("https://api.you.com/v1/chat/completions", headers=headers, json=data)
-        
-        # Логирование статуса и текста ответа
-        logging.info(f"Статус ответа: {response.status_code}")
-        logging.info(f"Текст ответа: {response.text}")
-        
-        response_data = response.json()
-        await bot.send_message(message.chat.id, response_data['choices'][0]['message']['content'])
-    except Exception as e:
-        logging.error(f"Ошибка при обработке сообщения: {e}")
-        await bot.send_message(message.chat.id, "Произошла ошибка при обработке вашего сообщения.")
-
-# Добавление обработчиков
-bot.register_message_handler(start, commands=['start'])
-bot.register_message_handler(handle_message, content_types=['text'])
-
-# Асинхронная функция main для запуска бота
-async def main():
-    logging.info("Бот запущен")
-    await bot.polling(non_stop=True, timeout=60)
-
-# Запуск бота
-if __name__ == '__main__':
-    asyncio.run(main())
