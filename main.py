@@ -39,6 +39,12 @@ async def handle_message(message):
             "model": "claude-3-sonnet",
             "messages": [{"role": "user", "content": user_message}]
         }
+        
+        # Логирование запроса
+        logging.info(f"URL: https://api.you.com/v1/chat/completions")
+        logging.info(f"Заголовки: {headers}")
+        logging.info(f"Данные: {data}")
+        
         response = requests.post("https://api.you.com/v1/chat/completions", headers=headers, json=data)
         
         # Логирование статуса и текста ответа
