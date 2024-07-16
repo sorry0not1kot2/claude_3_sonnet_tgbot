@@ -1,4 +1,3 @@
-# файл main.py
 import os
 import asyncio
 import logging
@@ -7,6 +6,7 @@ from telebot.async_telebot import AsyncTeleBot
 import g4f
 from g4f.Provider import You
 import undetected_chromedriver as uc
+import base64
 
 # Применение nest_asyncio
 nest_asyncio.apply()
@@ -17,6 +17,13 @@ logging.basicConfig(level=logging.INFO)
 # Настройка бота
 BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 bot = AsyncTeleBot(BOT_TOKEN)
+
+# Функция для получения токена аутентификации
+def get_auth() -> str:
+    auth_uuid = "507a52ad-7e69-496b-aee0-1c9863c7c819"
+    auth_token = f"public-token-live-{auth_uuid}:public-token-live-{auth_uuid}"
+    auth = base64.standard_b64encode(auth_token.encode()).decode()
+    return f"Basic {auth}"
 
 # Обработчик команды /start
 async def start(message):
@@ -34,7 +41,8 @@ async def handle_message(message):
         chrome_options.add_argument("--disable-software-rasterizer")
         
         driver = uc.Chrome(options=chrome_options, no_sandbox=True)
-        response = await g4f.ChatCompletion.create(provider=You, model='claude-3-sonnet', messages=[{"role": "user", "content": user_message}], driver=driver)
+        auth_header = get_auth()
+        response = await g4f.ChatCompletion.create(provider=You, model='claude-3-sonnet', messages=[{"role": "user", "content": user_message}], driver=driver, headers={"Authorization": auth_header})
         await bot.send_message(message.chat.id, response['choices'][0]['message']['content'])
         driver.quit()
     except Exception as e:
