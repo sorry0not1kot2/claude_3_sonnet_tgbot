@@ -40,6 +40,11 @@ async def handle_message(message):
             "messages": [{"role": "user", "content": user_message}]
         }
         response = requests.post("https://api.you.com/v1/chat/completions", headers=headers, json=data)
+        
+        # Логирование статуса и текста ответа
+        logging.info(f"Статус ответа: {response.status_code}")
+        logging.info(f"Текст ответа: {response.text}")
+        
         response_data = response.json()
         await bot.send_message(message.chat.id, response_data['choices'][0]['message']['content'])
     except Exception as e:
