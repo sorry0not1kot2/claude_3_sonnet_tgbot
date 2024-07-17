@@ -5,3 +5,5 @@ motor
 curl_cffi
 nest_asyncio
 requests
+nodriver
+telebot
