@@ -44,7 +44,8 @@ async def handle_message(message):
         response = await g4f.ChatCompletion.create(
             model="claude-3-sonnet",
             messages=[{"role": "user", "content": user_message}],
-            headers=headers
+            headers=headers,
+            har_file_path="path/to/your.har"  # Укажите путь к вашему .har файлу
         )
         
         # Логирование статуса и текста ответа
