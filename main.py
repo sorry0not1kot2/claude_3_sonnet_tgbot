@@ -1,15 +1,9 @@
 import os
 import asyncio
 import logging
-import nest_asyncio
+import aiohttp
 from telebot.async_telebot import AsyncTeleBot
-import g4f
-from g4f.Provider import You
 import base64
-import requests
-
-# Применение nest_asyncio
-nest_asyncio.apply()
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
@@ -26,10 +20,12 @@ def get_auth() -> str:
     return f"Basic {auth}"
 
 # Обработчик команды /start
+@bot.message_handler(commands=['start'])
 async def start(message):
-    await bot.send_message(message.chat.id, 'Привет! Я бот для общения с LLM Claude Sonet.')
+    await bot.send_message(message.chat.id, 'Привет! Я бот для общения с LLM Claude Sonnet.')
 
 # Асинхронная функция для обработки сообщений
+@bot.message_handler(content_types=['text'])
 async def handle_message(message):
     try:
         user_message = message.text
@@ -45,30 +41,27 @@ async def handle_message(message):
         logging.info(f"Заголовки: {headers}")
         logging.info(f"Данные: {data}")
         
-        response = requests.post("https://api.you.com/v1/chat/completions", headers=headers, json=data)
-        
-        # Логирование статуса и текста ответа
-        logging.info(f"Статус ответа: {response.status_code}")
-        logging.info(f"Текст ответа: {response.text}")
-        
-        # Проверка на пустой ответ
-        if response.status_code != 200 or not response.text:
-            raise ValueError("Пустой или некорректный ответ от API")
-        
-        response_data = response.json()
-        await bot.send_message(message.chat.id, response_data['choices'][0]['message']['content'])
+        async with aiohttp.ClientSession() as session:
+            async with session.post("https://api.you.com/v1/chat/completions", headers=headers, json=data) as response:
+                # Логирование статуса и текста ответа
+                logging.info(f"Статус ответа: {response.status}")
+                response_text = await response.text()
+                logging.info(f"Текст ответа: {response_text}")
+                
+                # Проверка на пустой ответ
+                if response.status != 200 or not response_text:
+                    raise ValueError("Пустой или некорректный ответ от API")
+                
+                response_data = await response.json()
+                await bot.send_message(message.chat.id, response_data['choices'][0]['message']['content'])
     except Exception as e:
         logging.error(f"Ошибка при обработке сообщения: {e}")
         await bot.send_message(message.chat.id, "Произошла ошибка при обработке вашего сообщения.")
 
-# Добавление обработчиков
-bot.register_message_handler(start, commands=['start'])
-bot.register_message_handler(handle_message, content_types=['text'])
-
 # Асинхронная функция main для запуска бота
 async def main():
     logging.info("Бот запущен")
-    await bot.polling(non_stop=True, timeout=60)
+    await bot.polling(non_stop=True)
 
 # Запуск бота
 if __name__ == '__main__':
