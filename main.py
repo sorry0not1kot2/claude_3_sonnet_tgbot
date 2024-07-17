@@ -1,9 +1,9 @@
 import os
 import asyncio
 import logging
-import aiohttp
-from telebot.async_telebot import AsyncTeleBot
 import base64
+from telebot.async_telebot import AsyncTeleBot
+import g4f
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
@@ -41,19 +41,23 @@ async def handle_message(message):
         logging.info(f"Заголовки: {headers}")
         logging.info(f"Данные: {data}")
         
-        async with aiohttp.ClientSession() as session:
-            async with session.post("https://api.you.com/v1/chat/completions", headers=headers, json=data) as response:
-                # Логирование статуса и текста ответа
-                logging.info(f"Статус ответа: {response.status}")
-                response_text = await response.text()
-                logging.info(f"Текст ответа: {response_text}")
-                
-                # Проверка на пустой ответ
-                if response.status != 200 or not response_text:
-                    raise ValueError("Пустой или некорректный ответ от API")
-                
-                response_data = await response.json()
-                await bot.send_message(message.chat.id, response_data['choices'][0]['message']['content'])
+        response = await g4f.ChatCompletion.create(
+            model="claude-3-sonnet",
+            messages=[{"role": "user", "content": user_message}],
+            headers=headers
+        )
+        
+        # Логирование статуса и текста ответа
+        logging.info(f"Статус ответа: {response.status}")
+        response_text = response.text
+        logging.info(f"Текст ответа: {response_text}")
+        
+        # Проверка на пустой ответ
+        if response.status != 200 or not response_text:
+            raise ValueError("Пустой или некорректный ответ от API")
+        
+        response_data = response.json()
+        await bot.send_message(message.chat.id, response_data['choices'][0]['message']['content'])
     except Exception as e:
         logging.error(f"Ошибка при обработке сообщения: {e}")
         await bot.send_message(message.chat.id, "Произошла ошибка при обработке вашего сообщения.")
